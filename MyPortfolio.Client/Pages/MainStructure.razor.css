@@ -1,3 +1,4 @@
+
 *{
   margin: 0;
   padding: 0;
@@ -7,7 +8,7 @@
 .page{
   display: flex;
   flex-direction: column;
-  background-color: #290346;
+  background-color: var(--main-background);
   width: 100%;
   height: 100vh;
 }
@@ -15,5 +16,5 @@
   position: sticky;
   top: 0;
   z-index: 100;
-
+  height:10vh;
 }

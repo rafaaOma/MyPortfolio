@@ -112,3 +112,8 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+:root{
+   --main-background: #290e3e;/* the color for the hole background */
+   --mainfont-color:  #f0f0f0;/* the color for the Font background */
+   --Secondary-background-color: rgb(143, 196, 239);/* secondary color for specific purposes */
+}

@@ -114,6 +114,8 @@ code {
 }
 :root{
    --main-background: #290e3e;/* the color for the hole background */
-   --mainfont-color:  #f0f0f0;/* the color for the Font background */
+   --mainfont-color:  white;/* the color for the Font background */
    --Secondary-background-color: rgb(143, 196, 239);/* secondary color for specific purposes */
+   --linear-grad-color: linear-gradient(to right, #502D55, #935073, #F6DBC0,#F8F4E9);
+   --hover-col: #502D55;
 }

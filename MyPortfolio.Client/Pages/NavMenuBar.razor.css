@@ -1,6 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
 .navigation-bar{
-    border:solid;
-    /* background-color: brown; */
     width:100%;
     height: inherit;
     display: flex;
@@ -31,3 +32,7 @@
 .nav-group li a:hover{ 
 color: var(--Secondary-background-color); 
 }
+/* nav:has(#home:target) a[href="#home"]{       //for coloring nav bar later
+  color: #F6DBC0;
+  font-weight: bold;
+} */

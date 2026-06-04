@@ -1,0 +1,47 @@
+main{
+    width: 100%;
+    height: fit-content;
+}
+.skils-section{
+    width: 85vw;
+    margin:  12vh 5vw;
+}
+h2{
+    color:var(--mainfont-color);
+}
+.skills-containers{
+    margin-top:10vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.front-back-tool-sec{
+    width: 25vw;
+    height: 25vh;
+    border:1px;
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 10px  rgba(138, 12, 255, 0.922); 
+    display: flex;
+    flex-direction: column;
+    padding: 3vh 4vh;
+    overflow:hidden;
+}
+h5{
+    color:var(--Secondary-background-color);
+}
+.hole-skills{
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    gap: 10px;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+.skill{
+    margin-top:2vh;
+    padding:5px 14px ;
+    border:1px rgba(138, 12, 255, 0.676) solid;
+    border-radius: 30px;
+    box-shadow: inset 0px 0px 3px  rgba(138, 12, 255, 0.922); 
+    color: var(--mainfont-color);
+}

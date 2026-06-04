@@ -49,6 +49,7 @@ a{
     border-radius: 25px;
     border-color: var(--Secondary-background-color);
     padding:10px 25px;
+    box-shadow: inset 0 1px 5px var(--Secondary-background-color);
 }
 a:hover{
     background-color:var(--Secondary-background-color);

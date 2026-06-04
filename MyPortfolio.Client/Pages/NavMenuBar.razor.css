@@ -7,6 +7,10 @@ html {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    background-color:Var(--main-background);
+    border: 1px red;
+    border-radius: 0px 0px 20px 20px ;
+    box-shadow:0 0px 5px rgba(138, 12, 255, 0.267) ;
 }
 .nav-group{
     list-style: none;
@@ -24,7 +28,7 @@ html {
 }
 .logo{
     color: var(--Secondary-background-color);
-    padding:1.5vh 0 0 6vw;
+    padding:1.2vh 0 0 6vw;
     font-size: 1.7rem;
     font-family: "Brush Script MT", cursive;
 }

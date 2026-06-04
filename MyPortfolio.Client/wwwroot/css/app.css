@@ -118,4 +118,5 @@ code {
    --Secondary-background-color: rgb(143, 196, 239);/* secondary color for specific purposes */
    --linear-grad-color: linear-gradient(to right, #502D55, #935073, #F6DBC0,#F8F4E9);
    --hover-col: #502D55;
+   --Third-text-color:rgb(193, 193, 193);
 }

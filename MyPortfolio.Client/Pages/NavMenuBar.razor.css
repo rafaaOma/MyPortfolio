@@ -32,11 +32,9 @@ html {
     font-size: 1.7rem;
     font-family: "Brush Script MT", cursive;
 }
-/*insted of hover try other way */
 .nav-group li a:hover{ 
-color: var(--Secondary-background-color); 
+color: rgb(217, 238, 255); 
 }
-/* nav:has(#home:target) a[href="#home"]{       //for coloring nav bar later
-  color: #F6DBC0;
-  font-weight: bold;
-} */
+.active{
+  color:  var(--Secondary-background-color) !important;
+}

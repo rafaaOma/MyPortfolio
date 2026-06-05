@@ -1,15 +1,26 @@
 @page "/main"
+@inject IJSRuntime JS
 <div class="page">
     <div class="navbar">
         <NavMenuBar />  
     </div>
-    <div class="Home-Section" id="home">
+    <section class="Home-Section" id="home">
         <Home />
-    </div>
-    <main class="About-section" id="aboutme">
+    </section >
+    <section class="About-section" id="aboutme">
         <About />
-    </main>
-    <main class="Skils-section" id="skils">
+    </section>
+    <section class="Skils-section" id="skils">
         <SkilsSec />
-    </main>
+    </section>
 </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initNavObserver");
+        }
+    }
+}

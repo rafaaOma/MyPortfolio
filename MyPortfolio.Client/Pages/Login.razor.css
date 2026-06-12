@@ -1,6 +1,96 @@
-.login-page{
-    background-image: url("/Images/loginbackground.jpg");
+.login-page {
     width: 100vw;
     height: 100vh;
-    
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("/Images/background_img.jpg");
+    background-size: cover;
+    background-position: center;
+    filter: blur(2px);
+}
+.login-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: fit-content;
+    height:fit-content;
+    padding: 60px 40px;
+    background: #58304591;
+    border-radius: 15px;
+    backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(5px);
+}
+.logo-sec{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color:var(--mainfont-color);
+}
+.logo{
+    color: #F6DBC0;
+    font-size: 1.3rem;
+    font-weight:bold;
+    font-family: "Brush Script MT", cursive;
+}
+.logo::after{
+    content: " ★";
+    position: relative;
+    bottom:15px;
+}
+.logo::before{
+    content: " ★";
+    position: relative;
+    top:15px;
+}
+h2{
+    margin-top:7vh;
+    font-weight: bold;
+    font-size: 1.6rem;
+}
+h6{
+    color:var(--Third-text-color);
+    margin-bottom: 7vh;
+    font-size: 0.9rem;
+}
+input{
+    background-color: transparent;
+    border:none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 5px 0;
+    outline: none;
+    color: white;
+}
+input:focus {
+    border-bottom: 1.2px solid white;
+}
+input::placeholder{
+    color: rgba(255, 255, 255, 0.623);
+    font-size: 0.7rem;
+}
+.feilds-sec div{
+    display: flex;
+    gap:10px;
+    align-items: center;
+}
+button{
+    border-radius: 25px 25px;
+    padding: 6px 15px;
+    margin-top:4vh;
+    background-color: #F6DBC0;
+    border-style: none;
+    margin-left:2vw;
+}
+button:hover{
+    background-color: #eacfb4c8;
 }

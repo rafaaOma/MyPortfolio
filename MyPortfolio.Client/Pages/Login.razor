@@ -1,6 +1,9 @@
 @page "/login"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject HttpClient Http
 @inject NavigationManager Nav
+@* @inject AuthenticationStateProvider AuthProvider *@
 <div class="login-page">
     <div class="login-container">
         <div class="logo-sec">
@@ -28,9 +31,21 @@
                 <input type="password" placeholder="Password.." @bind="model.Password">
             </div>
             <button type="submit"  @onclick="LoginTo">Login</button>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p style="color:red">@errorMessage</p>
+            }
         </div>
     </div>  
 </div>
+<AuthorizeView>
+    <Authorized>
+        <p>LOGGED IN</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>NOT LOGGED</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private LoginRequest model = new LoginRequest();
@@ -39,12 +54,16 @@
 
     private async Task LoginTo()
     {
-        var response = await Http.PostAsJsonAsync("api/login/loginVerifier", model);
+        var response = await Http.PostAsJsonAsync("api/loginVerifier/login", model);
 
         if (response.IsSuccessStatusCode)
         {
             var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
 
+            await LocalStorage.SetItemAsync("token", token?.Token);//storing the token in local storage for later use
+
+            @* var customAuth = (AuthStateProvider)AuthProvider;
+            customAuth.NotifyUserAuthentication(); *@
             Console.WriteLine(token?.Token);
             Nav.NavigateTo("/main");
         }

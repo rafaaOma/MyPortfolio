@@ -64,7 +64,7 @@ h6{
     font-size: 0.9rem;
 }
 input{
-    background-color: transparent;
+    background-color: transparent !important;
     border:none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     padding: 5px 0;
@@ -93,4 +93,9 @@ button{
 }
 button:hover{
     background-color: #eacfb4c8;
+}
+.feilds-sec p{
+    position:absolute;
+    left:12vw;
+    bottom:8vh;
 }

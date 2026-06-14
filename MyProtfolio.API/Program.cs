@@ -10,10 +10,10 @@ var key = builder.Configuration["JWT:Key"]
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("http://localhost:5159",
-        policy => policy.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod());
+    options.AddPolicy("BlazorPolicy",
+        policy => policy.WithOrigins("http://localhost:5159")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
 });
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -54,7 +54,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
-app.UseCors("http://localhost:5159");
+app.UseCors("BlazorPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();

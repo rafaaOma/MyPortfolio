@@ -29,19 +29,35 @@ h2{
 h5{
     color:var(--Secondary-background-color);
 }
-.hole-skills{
-    display: flex;
-    flex-direction: row;
-    width: fit-content;
-    gap: 10px;
-    flex-wrap: wrap;
-    overflow: hidden;
-}
 .skill{
     margin-top:2vh;
+    width: fit-content;
     padding:5px 14px ;
+    height: fit-content;
+    margin-right: 0.8vw;
     border:1px rgba(138, 12, 255, 0.676) solid;
     border-radius: 30px;
     box-shadow: inset 0px 0px 3px  rgba(138, 12, 255, 0.922); 
     color: var(--mainfont-color);
+}
+.hole-skills{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-Between;
+    width: 22vw;
+    height:16vh;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+.myS{
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: fit-content;
+    height: 14vh;
+    scroll-behavior: smooth;
+    padding-bottom:10px;
+    scrollbar-color: var(--Secondary-background-color) rgba(110, 110, 110, 0.534);
 }

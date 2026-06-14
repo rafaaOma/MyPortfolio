@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Components.Authorization
 <main>
     <div class="skils-section">
         <h2>Skills & Technologies </h2>
@@ -5,15 +6,22 @@
             <div class="front-back-tool-sec">
                 <h5>Frontend</h5>
                 <div class="hole-skills">
-                    <h6 class="skill">C#</h6>
-                    <h6 class="skill">html</h6>
+                    <div class="myS">
+                        <span class="skill">C#</span>
+                        <span class="skill">html</span>
+                        <span class="skill">lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</span>
+                    </div>
                 </div>
             </div>
 
              <div class="front-back-tool-sec">
                 <h5>Backend</h5>
                 <div class="hole-skills">
-                    <h6 class="skill">ss</h6>
+                     <div class="myS">
+                        <span class="skill">C#</span>
+                        <span class="skill">html</span>
+                        <span class="skill">lorem  Quisquam, quod.</span>
+                    </div>
                 </div>
             </div>
 
@@ -24,6 +32,12 @@
                 </div>
             </div>
         </div>
+            <div class="add-skill">
+                            <AuthorizeView Roles="Admin">
+                                <Authorized>
+                                    <button class="btn btn-primary">Add</button>
+                                </Authorized>
+                            </AuthorizeView></div>
     </div>
 </main>
 @* @code{

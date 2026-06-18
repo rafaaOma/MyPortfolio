@@ -4,7 +4,8 @@ using Model.Admin;
 namespace MyProtfolio.API.Data{
     public class PortfolioDbContext : DbContext
     {
-        public DbSet<Admin> Admins {get; set;}
+        public DbSet<Admin> Admins {get; set;} //admin info
+        public DbSet<Skill> Skills { get; set; } //skills table
         public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options) : base(options)
         {
         }

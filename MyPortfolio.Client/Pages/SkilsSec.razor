@@ -1,61 +1,212 @@
 @using Microsoft.AspNetCore.Components.Authorization
 
+@inject HttpClient Http
 <main>
     <div class="skils-section">
         <h2>Skills & Technologies </h2>
         <div class="skills-containers">
-            
             <div class="front-back-tool-sec">
                 <div class="header">
                     <h5>Frontend</h5>
                     <AuthorizeView Roles="Admin">
                         <Authorized>
-                            <button class="btn-add">Add</button>
+                            <button class="btn-add" @onclick='() => AddNewSkill(FrontendSkills, "frontend")'>Add</button> 
                         </Authorized>
                     </AuthorizeView>
                 </div>
                 <div class="hole-skills">
                     <div class="myS">
-                        <span class="skill">C#</span>
-                        <span class="skill">html</span>
-                        <span class="skill">lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</span>
-                    </div>
-                </div>
-            </div>
+                        @foreach (SkillItem skill in FrontendSkills)
+                        {
+                            <div class="skill" @key="skill">
+                                @if (skill.IsEditing)
+                                { 
+                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
 
-             <div class="front-back-tool-sec">
-                <div class="header">
-                    <h5>Backend</h5>
-                    <AuthorizeView Roles="Admin">
-                        <Authorized>
-                            <button class="btn-add">Add</button>
-                        </Authorized>
-                    </AuthorizeView>
-                </div>
-                <div class="hole-skills">
-                     <div class="myS">
-                        <span class="skill">C#</span>
-                        <span class="skill">html</span>
-                        <span class="skill">lorem  Quisquam, quod.</span>
+                                        <div class="alter-btn">
+                                            <button class="alter" @onclick="() => SaveSkill(skill)">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                            <button class="delete-btn" @onclick="() => DeleteSkill(FrontendSkills, skill)">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </div>
+                                }
+                                else
+                                {
+                                <AuthorizeView Roles="Admin"> 
+                                    <Authorized>
+                                         <span @onclick="() => EditSkill(skill)" style="cursor:pointer"> @skill.Name </span>
+                                    </Authorized> 
+                                <NotAuthorized> 
+                                    <span>@skill.Name</span>
+                                </NotAuthorized> 
+                                </AuthorizeView>
+                                }
+                            </div>
+                        }
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="front-back-tool-sec">
-                <div class="header">
-                    <h5>Tools & Databases</h5>
-                    <AuthorizeView Roles="Admin">
-                        <Authorized>
-                            <button class="btn-add">Add</button>
-                        </Authorized>
-                    </AuthorizeView>
+
+                <div class="front-back-tool-sec">
+                    <div class="header">
+                        <h5>Backend</h5>
+                        <AuthorizeView Roles="Admin">
+                            <Authorized>
+                                <button class="btn-add" @onclick='() => AddNewSkill(BackendSkills, "backend")'>Add</button>
+                            </Authorized>
+                        </AuthorizeView>
+                    </div>
+                    <div class="hole-skills">
+                        <div class="myS">
+                             @foreach (SkillItem skill in BackendSkills)
+                        {
+                            <div class="skill" @key="skill">
+                                @if (skill.IsEditing)
+                                { 
+                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
+
+                                        <div class="alter-btn">
+                                            <button class="alter" @onclick="() => SaveSkill(skill)">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                            <button class="delete-btn" @onclick="() => DeleteSkill(BackendSkills,skill)">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </div>
+                                }
+                                else
+                                {
+                                <AuthorizeView Roles="Admin"> 
+                                    <Authorized>
+                                         <span @onclick="() => EditSkill(skill)" style="cursor:pointer"> @skill.Name </span>
+                                    </Authorized> 
+                                <NotAuthorized> 
+                                    <span>@skill.Name</span>
+                                </NotAuthorized> 
+                                </AuthorizeView>
+                                }
+                            </div>
+                        }
+                        </div>
+                    </div>
                 </div>
-                <div class="hole-skills">
-                    <h6 class="skill">ss</h6>
+                <div class="front-back-tool-sec">
+                    <div class="header">
+                        <h5>Tools & Databases</h5>
+                        <AuthorizeView Roles="Admin">
+                            <Authorized>
+                                <button class="btn-add"  @onclick='() => AddNewSkill(DatabaseSkills,"tools")'>Add</button>
+                            </Authorized>
+                        </AuthorizeView>
+                    </div>
+                    <div class="hole-skills">
+                        <div class="myS">
+                             @foreach (SkillItem skill in DatabaseSkills)
+                            {
+                            <div class="skill" @key="skill">
+                                @if (skill.IsEditing)
+                                { 
+                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
+
+                                        <div class="alter-btn">
+                                            <button class="alter" @onclick="() => SaveSkill(skill)">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                            <button class="delete-btn" @onclick="() => DeleteSkill(DatabaseSkills,skill)">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </div>
+                                }
+                                else
+                                {
+                                <AuthorizeView Roles="Admin"> 
+                                    <Authorized>
+                                         <span @onclick="() => EditSkill(skill)" style="cursor:pointer"> @skill.Name </span>
+                                    </Authorized> 
+                                <NotAuthorized> 
+                                    <span>@skill.Name</span>
+                                </NotAuthorized> 
+                                </AuthorizeView>
+                                }
+                            </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
-@code{
-    public string Skill;
+    </main>
+@code {
+     public List<SkillItem> FrontendSkills= new();//fornt end list
+    public List<SkillItem> BackendSkills= new();//back end list
+    public List<SkillItem> DatabaseSkills= new(); //database and tools list 
+    protected override async Task OnInitializedAsync()
+    {
+        FrontendSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=frontend") ?? new List<SkillItem>();
+        BackendSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=backend") ?? new List<SkillItem>();
+        DatabaseSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=tools") ?? new List<SkillItem>();
+    }
+    void AddNewSkill(List<SkillItem> section, string category)
+    {
+        var newSkill = new SkillItem
+        {
+            Name = "",
+            IsEditing = true,
+            Category= category,
+            Id = 0
+        };
+        section.Add(newSkill);
+
+        StateHasChanged(); 
+    }
+
+    void EditSkill(SkillItem skill)
+    {
+        skill.IsEditing = true;
+        StateHasChanged();
+    }
+
+    protected async Task SaveSkill(SkillItem skill)
+    {
+
+    HttpResponseMessage response;
+
+    if (skill.Id == 0)
+    {
+        // NEW
+        response = await Http.PostAsJsonAsync("api/SkillsModification/AddSkill", skill);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var created = await response.Content.ReadFromJsonAsync<SkillItem>();
+            skill.Id = created.Id;
+        }
+    }
+    else
+    {
+        response = await Http.PutAsJsonAsync("api/SkillsModification/UpdateSkill", skill);
+    }
+
+    if (response.IsSuccessStatusCode)
+        skill.IsEditing = false;
+
+    StateHasChanged();
+    }
+    protected async Task DeleteSkill(List<SkillItem> section, SkillItem skill)
+    {
+        await Http.DeleteAsync($"api/SkillsModification/Delete/{skill.Id}");
+        section.Remove(skill);
+        StateHasChanged();
+    }
+
+    public class SkillItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+         public string Category { get; set; } ="";
+        public bool IsEditing { get; set; } = false;
+    }
 }
+

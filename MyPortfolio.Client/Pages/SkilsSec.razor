@@ -21,7 +21,7 @@
                             <div class="skill" @key="skill">
                                 @if (skill.IsEditing)
                                 { 
-                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
+                                        <InputText class="input" " @bind-Value="skill.Name" placeholder="Enter.." />
 
                                         <div class="alter-btn">
                                             <button class="alter" @onclick="() => SaveSkill(skill)">
@@ -65,7 +65,7 @@
                             <div class="skill" @key="skill">
                                 @if (skill.IsEditing)
                                 { 
-                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
+                                        <InputText class="input" @bind-Value="skill.Name" placeholder="Enter.." />
 
                                         <div class="alter-btn">
                                             <button class="alter" @onclick="() => SaveSkill(skill)">
@@ -105,10 +105,10 @@
                         <div class="myS">
                              @foreach (SkillItem skill in DatabaseSkills)
                             {
-                            <div class="skill" @key="skill">
+                            <div class="skill" @key="skill.Id">
                                 @if (skill.IsEditing)
                                 { 
-                                        <InputText @bind-Value="skill.Name" placeholder="Enter.." />
+                                        <InputText class="input" @bind-Value="skill.Name" placeholder="Enter.." />
 
                                         <div class="alter-btn">
                                             <button class="alter" @onclick="() => SaveSkill(skill)">
@@ -139,27 +139,30 @@
         </div>
     </main>
 @code {
-     public List<SkillItem> FrontendSkills= new();//fornt end list
+    public List<SkillItem> FrontendSkills= new();//fornt end list
     public List<SkillItem> BackendSkills= new();//back end list
     public List<SkillItem> DatabaseSkills= new(); //database and tools list 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()//to get data from database before component render to load data
     {
         FrontendSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=frontend") ?? new List<SkillItem>();
         BackendSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=backend") ?? new List<SkillItem>();
         DatabaseSkills = await Http.GetFromJsonAsync<List<SkillItem>>("api/SkillsModification/GetAll?category=tools") ?? new List<SkillItem>();
-    }
-    void AddNewSkill(List<SkillItem> section, string category)
+
+        StateHasChanged();//to re-render components with it's new data
+         }
+    void AddNewSkill(List<SkillItem> section, string category)//adding skill only in list depeneds on type (not sending it to database yet)
     {
         var newSkill = new SkillItem
         {
             Name = "",
             IsEditing = true,
             Category= category,
-            Id = 0
+            Id = 0,
+            IsNew = true
         };
         section.Add(newSkill);
 
-        StateHasChanged(); 
+        StateHasChanged(); //re-render list in ui 
     }
 
     void EditSkill(SkillItem skill)
@@ -170,35 +173,62 @@
 
     protected async Task SaveSkill(SkillItem skill)
     {
+        HttpResponseMessage response;
 
-    HttpResponseMessage response;
+        if (skill.Id == 0 && skill.Name != string.Empty)
+        {
+            // ADD NEW
+            response = await Http.PostAsJsonAsync("api/SkillsModification/AddSkill", skill);
 
-    if (skill.Id == 0)
-    {
-        // NEW
-        response = await Http.PostAsJsonAsync("api/SkillsModification/AddSkill", skill);
+            if (response.IsSuccessStatusCode)
+            {
+                var created = await response.Content.ReadFromJsonAsync<SkillItem>();
+
+                if (created != null)
+                {
+                    skill.Id = created.Id; //created skill id from database 
+                }
+            }
+        }
+        else
+        {
+            // UPDATE
+            if( skill.Name != string.Empty)
+            response = await Http.PutAsJsonAsync("api/SkillsModification/UpdateSkill", skill);
+        }
 
         if (response.IsSuccessStatusCode)
         {
-            var created = await response.Content.ReadFromJsonAsync<SkillItem>();
-            skill.Id = created.Id;
+            skill.IsEditing = false;
+
+            FrontendSkills = FrontendSkills.ToList();
+            BackendSkills = BackendSkills.ToList();
+            DatabaseSkills = DatabaseSkills.ToList();
         }
-    }
-    else
-    {
-        response = await Http.PutAsJsonAsync("api/SkillsModification/UpdateSkill", skill);
-    }
+        else
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"ERROR: {error}");
+        }
 
-    if (response.IsSuccessStatusCode)
-        skill.IsEditing = false;
-
-    StateHasChanged();
+        StateHasChanged();
     }
     protected async Task DeleteSkill(List<SkillItem> section, SkillItem skill)
     {
-        await Http.DeleteAsync($"api/SkillsModification/Delete/{skill.Id}");
-        section.Remove(skill);
-        StateHasChanged();
+         if (skill.Id == 0)
+        {
+            section.Remove(skill);
+            StateHasChanged();
+            return;
+        }
+
+        var response =await Http.DeleteAsync($"api/SkillsModification/Delete/{skill.Id}");
+        
+        if (response.IsSuccessStatusCode)
+        {
+            section.Remove(skill);
+        }
+            StateHasChanged();
     }
 
     public class SkillItem
@@ -207,6 +237,7 @@
         public string Name { get; set; } = "";
          public string Category { get; set; } ="";
         public bool IsEditing { get; set; } = false;
+        public bool IsNew { get; set; }
     }
 }
 

@@ -11,6 +11,7 @@ namespace SkillsController.Controllers
         {
             _context = context;
         }
+        
 
    [HttpGet("GetAll")]
     public IActionResult GetAll([FromQuery] string category)//fetching data from data base 
@@ -22,14 +23,14 @@ namespace SkillsController.Controllers
         return Ok(skills);
     }
 
-    [HttpPost]
+    [HttpPost("AddSkill")]
     public IActionResult AddSkill(Skill skill)
     {
         _context.Skills.Add(skill);
         _context.SaveChanges();
         return Ok(skill);
     }
-     [HttpDelete("{id}")]
+     [HttpDelete("Delete/{id}")]
     public IActionResult Delete(int id)
     {
         var skill = _context.Skills.Find(id);
@@ -38,14 +39,24 @@ namespace SkillsController.Controllers
         _context.Skills.Remove(skill);
         _context.SaveChanges();
 
+
         return Ok();
     }
-    [HttpPut]
+    [HttpPut("UpdateSkill")]
     public IActionResult UpdateSkill(Skill skill)
     {
-        _context.Skills.Update(skill);
-        _context.SaveChanges();
-        return Ok(skill);
+    var existing = _context.Skills.Find(skill.Id);
+
+    if (existing == null)
+        return NotFound();
+
+    existing.Name = skill.Name;
+    existing.Category = skill.Category;
+
+    _context.SaveChanges();
+
+    return Ok(existing);
     }
     }
+    
 }

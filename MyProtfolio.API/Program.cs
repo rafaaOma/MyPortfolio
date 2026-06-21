@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using MyProtfolio.API.Data;
 var builder = WebApplication.CreateBuilder(args);
-
 var key = builder.Configuration["JWT:Key"]
     ?? throw new Exception("JWT Key is missing");
 

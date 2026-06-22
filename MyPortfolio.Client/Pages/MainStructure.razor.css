@@ -1,6 +1,6 @@
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 50px;
 }
 *{
   margin: 0;
@@ -16,7 +16,7 @@ html {
   height: fit-content;
 }
 section {
-  min-height: 100vh;
+  min-height: 60vh;
   display: flex;
 }
 .navbar{

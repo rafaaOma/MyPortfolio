@@ -157,8 +157,7 @@
             Name = "",
             IsEditing = true,
             Category= category,
-            Id = 0,
-            IsNew = true
+            Id = 0
         };
         section.Add(newSkill);
 
@@ -173,9 +172,13 @@
 
     protected async Task SaveSkill(SkillItem skill)
     {
+        //Prevent sending invalid data (null or empty skill)to server
+        if (string.IsNullOrWhiteSpace(skill.Name))
+        return;
+
         HttpResponseMessage response;
 
-        if (skill.Id == 0 && skill.Name != string.Empty)
+        if (skill.Id == 0)
         {
             // ADD NEW
             response = await Http.PostAsJsonAsync("api/SkillsModification/AddSkill", skill);
@@ -193,10 +196,8 @@
         else
         {
             // UPDATE
-            if( skill.Name != string.Empty)
             response = await Http.PutAsJsonAsync("api/SkillsModification/UpdateSkill", skill);
         }
-
         if (response.IsSuccessStatusCode)
         {
             skill.IsEditing = false;
@@ -237,7 +238,6 @@
         public string Name { get; set; } = "";
          public string Category { get; set; } ="";
         public bool IsEditing { get; set; } = false;
-        public bool IsNew { get; set; }
     }
 }
 

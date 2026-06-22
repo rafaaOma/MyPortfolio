@@ -14,7 +14,7 @@ namespace SkillsController.Controllers
         
 
    [HttpGet("GetAll")]
-    public IActionResult GetAll([FromQuery] string category)//fetching data from data base 
+    public IActionResult GetAll([FromQuery] string category)//fetching data from data base for specific catagories
     {
         var skills = _context.Skills
         .Where(s => s.Category == category)
@@ -24,7 +24,7 @@ namespace SkillsController.Controllers
     }
 
     [HttpPost("AddSkill")]
-    public IActionResult AddSkill(Skill skill)
+    public IActionResult AddSkill(Skill skill)//add new skill
     {
         _context.Skills.Add(skill);
         _context.SaveChanges();

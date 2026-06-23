@@ -1,0 +1,115 @@
+@using Microsoft.AspNetCore.Components.Authorization
+<main>
+    <div class="content">
+        <h2 class="title">My Projects</h2>
+        <p class="title-p">This section highlights a collection of projects I have developed to demonstrate my technical skills and understanding of software development. Each project focuses on building practical and efficient solutions using modern tools and technologies.</p>
+        <div class="card-container">
+            @foreach (var project in Projects)
+            {
+                <div class ="card">
+                    <div class="images">
+                    <AuthorizeView Roles="Admin"> 
+                            <Authorized>
+                                <label class="image-upload">
+                                    Click to upload images
+                                    <InputFile multiple OnChange="(e) => HandleFiles(e, project)" style="display:none" />
+                                </label>
+                            </Authorized> 
+                        </AuthorizeView>
+                    @if (project.Images.Any())
+                        {
+                            <div class=control-image>
+                                <button @onclick="() => PrevImage(project)">⬅</button>
+                                <img class="proj-image" src="@project.Images[project.CurrentImageIndex]" />
+                                <button @onclick="() =>  NextImage(project)">➡</button>
+                            </div>
+                        }
+                    </div>
+                    <div class="proj-name">
+                        <AuthorizeView Roles="Admin"> 
+                            <Authorized>
+                                <input type="text" @bind="project.projectName" placeholder="Enter.." >
+
+                                    <div class="alter-btn">
+                                            <button class="alter" @onclick="">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                            <button class="delete-btn" @onclick="">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </div>
+                            </Authorized> 
+                            <NotAuthorized>
+                                <h4 class="proj-title">
+                                     @project.projectName
+                                </h4>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </div> 
+                <p class="proj-description"></p>
+                <div class=proj-skills>
+                    <div>
+                        <input type="text" />
+                    </div>
+                </div>
+            </div> 
+            }       
+        </div>
+    </div>
+</main>
+
+
+@code {
+
+    private List<Project> Projects = new();
+    protected override void OnInitialized()
+    {
+        Projects.Add(new Project());
+    }
+
+    async Task HandleFiles(InputFileChangeEventArgs e, Project project) //InputFileChangeEventArgs obj represnts all files admin choose
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+
+            var imageBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+            project.Images.Add(imageBase64);
+        }
+    }
+
+    void NextImage(Project project)
+    {
+        if (project.Images.Count == 0) return;
+
+        project.CurrentImageIndex++;
+
+        if (project.CurrentImageIndex >= project.Images.Count)
+            project.CurrentImageIndex = 0;
+    }
+
+    void PrevImage(Project project)
+    {
+        if (project.Images.Count == 0) return;
+
+        project.CurrentImageIndex--;
+
+        if (project.CurrentImageIndex < 0)
+            project.CurrentImageIndex = project.Images.Count - 1;
+    }
+
+    protected async Task Saveifo(){
+        
+    }
+
+    class Project{
+        public string projectName="";
+        public int Id;
+        bool IsEditing=false;
+
+        public List<string> Images = new();  
+        public int CurrentImageIndex = 0;  //image index for specific image in list images in project
+    }
+}

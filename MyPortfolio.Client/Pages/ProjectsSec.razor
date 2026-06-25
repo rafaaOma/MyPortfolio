@@ -1,12 +1,24 @@
 @using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+
 <main>
     <div class="content">
         <h2 class="title">My Projects</h2>
+                    <AuthorizeView Roles="Admin"> <!-- admin can add new project with add button-->
+                        <Authorized>
+                            <button class="btn-add" @onclick="AddNewproject">Add project</button> 
+                        </Authorized>
+                    </AuthorizeView>
         <p class="title-p">This section highlights a collection of projects I have developed to demonstrate my technical skills and understanding of software development. Each project focuses on building practical and efficient solutions using modern tools and technologies.</p>
+        
+        <!-- project card-->
         <div class="card-container">
             @foreach (var project in Projects)
             {
-                <div class ="card">
+                <div class ="card"  @key="project.Id">
+
+
+                    <!--project images-->
                     <div class="images">
                     <AuthorizeView Roles="Admin"> 
                             <Authorized>
@@ -20,37 +32,79 @@
                         {
                             <div class=control-image>
                                 <button @onclick="() => PrevImage(project)">⬅</button>
-                                <img class="proj-image" src="@project.Images[project.CurrentImageIndex]" />
+                                <img class="proj-image" src="@($"https://localhost:5276/{project.Images[project.CurrentImageIndex].ImageUrl}")" />
+                                <button @onclick="() => DeleteImage(project, project.Images[project.CurrentImageIndex])">❌</button>
                                 <button @onclick="() =>  NextImage(project)">➡</button>
                             </div>
                         }
                     </div>
-                    <div class="proj-name">
-                        <AuthorizeView Roles="Admin"> 
-                            <Authorized>
-                                <input type="text" @bind="project.projectName" placeholder="Enter.." >
 
-                                    <div class="alter-btn">
-                                            <button class="alter" @onclick="">
+
+                    <!--project name-->
+                    <div class="proj-name">
+                        <AuthorizeView Roles="Admin">
+                            <Authorized>
+                                @if (project.IsEditing)
+                                    {
+                                        <input type="text" @bind="project.projectName" placeholder="Enter project name.." />
+
+                                        <div class="alter-btn">
+                                            <button class="save" @onclick="() => UpdateProjectName(project)">
                                                 <i class="bx bx-check"></i>
                                             </button>
-                                            <button class="delete-btn" @onclick="">
+
+                                            <button class="delete-btn" @onclick="() => ClearProjectName(project)">
                                                 <i class='bx bx-trash'></i>
                                             </button>
                                         </div>
-                            </Authorized> 
-                            <NotAuthorized>
-                                <h4 class="proj-title">
-                                     @project.projectName
-                                </h4>
-                            </NotAuthorized>
-                        </AuthorizeView>
+                                    }
+                                    else
+                                    {
+                                        <h4 class="proj-title"
+                                            @onclick="() => EnableEdit(project)">
+                                            @project.projectName
+                                        </h4>
+                                    }    
+                                </Authorized>
+                                <NotAuthorized>
+                                    <h4 class="proj-title">
+                                        @project.projectName
+                                    </h4>
+                                </NotAuthorized>
+                            </AuthorizeView>
                     </div> 
-                <p class="proj-description"></p>
+                <p class="proj-description">
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <textarea @bind="project.Description" placeholder="Enter description..."></textarea>
+                        </Authorized>
+                        <NotAuthorized>
+                            <p class="proj-description">@project.Description</p>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </p>
                 <div class=proj-skills>
-                    <div>
-                        <input type="text" />
-                    </div>
+                    @foreach (var skill in project.Skills)
+                    {
+                        <div class="skill-item">
+                            <AuthorizeView Roles="Admin">
+                                <Authorized>
+                                    <input type="text" @bind="skill.Name" />
+
+                                    <button @onclick="() => RemoveSkill(project, skill)">❌</button>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <span>@skill.Name</span>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </div>
+                    }
+
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <button @onclick="() => AddSkill(project)">➕ Add Skill</button>
+                        </Authorized>
+                    </AuthorizeView>
                 </div>
             </div> 
             }       
@@ -62,23 +116,50 @@
 @code {
 
     private List<Project> Projects = new();
-    protected override void OnInitialized()
+    private int counter = 1;
+    protected override async Task OnInitializedAsync()//uploding the projects list from database
     {
-        Projects.Add(new Project());
+        Projects = await Http.GetFromJsonAsync<List<Project>>("api/Project/GetAll")
+                ?? new List<Project>();
     }
 
-    async Task HandleFiles(InputFileChangeEventArgs e, Project project) //InputFileChangeEventArgs obj represnts all files admin choose
+async Task HandleFiles(InputFileChangeEventArgs e, Project project)
+{
+    foreach (var file in e.GetMultipleFiles())
     {
-        foreach (var file in e.GetMultipleFiles())
+        var content = new MultipartFormDataContent();
+
+        var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+        var fileContent = new StreamContent(stream);
+
+        fileContent.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+        content.Add(fileContent, "file", file.Name);
+
+        var response = await Http.PostAsync(
+            $"api/Project/UploadImage/{project.Id}", content);
+
+        if (response.IsSuccessStatusCode)
         {
-            var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
+            var newImage = await response.Content.ReadFromJsonAsync<ProjectImage>();
 
-            var imageBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
-
-            project.Images.Add(imageBase64);
+            if (newImage != null)
+            {
+                project.Images.Add(newImage); 
+            }
         }
     }
+}
+async Task DeleteImage(Project project, ProjectImage image)
+{
+    await Http.DeleteAsync($"api/Project/DeleteImage/{image.Id}");
+
+    project.Images.Remove(image);
+
+    if (project.CurrentImageIndex >= project.Images.Count)
+        project.CurrentImageIndex = 0;
+}
 
     void NextImage(Project project)
     {
@@ -100,16 +181,67 @@
             project.CurrentImageIndex = project.Images.Count - 1;
     }
 
-    protected async Task Saveifo(){
-        
+    protected async Task Saveinfo(){
+
+    }
+    void AddNewproject()
+    {
+
+        Projects.Add(new Project
+        {
+            Id = counter++,
+            projectName = "",
+            Description = "",
+            Skills = new List<Skill>()
+        });
+    }
+
+    void UpdateProjectName(Project project)
+    {
+        project.IsEditing = false;
+        StateHasChanged();
+    }
+
+    void ClearProjectName(Project project)
+    {
+        project.projectName = "";
+        StateHasChanged();
+    }
+
+    void AddSkill(Project project)
+    {
+        project.Skills.Add(new Skill { Name = "" });
+    }
+
+    void RemoveSkill(Project project, Skill skill)
+    {
+        project.Skills.Remove(skill);
+    }
+
+    void EnableEdit(Project project)
+    {
+        project.IsEditing = true;
+        StateHasChanged();
     }
 
     class Project{
-        public string projectName="";
-        public int Id;
-        bool IsEditing=false;
-
-        public List<string> Images = new();  
+        public string projectName=""; //project name
+        public int Id; //project id
+        public bool IsEditing=false; //for modification on specific project
+        public string Description=""; //project description
+        public List<Skill> Skills = new(); //skills learnd in project
+        public List<ProjectImage> Images { get; set; } = new(); //images for project
         public int CurrentImageIndex = 0;  //image index for specific image in list images in project
+    }
+
+    class Skill
+    {
+        public string Name = "";
+    }
+    public class ProjectImage
+    {
+        public int Id { get; set; }
+        public string ImageUrl { get; set; } = "";
+        public int ProjectId { get; set; }
     }
 }

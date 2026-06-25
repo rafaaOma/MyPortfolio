@@ -10,7 +10,7 @@ main{
     padding: 5vh 5vw;
     border-top: solid 1px;
     border-bottom: solid 1px;
-    border-color:var(--Third-text-color);
+    border-color:rgba(128, 128, 128, 0.139);
 }
 .title{
     color:var(--mainfont-color);
@@ -26,12 +26,12 @@ main{
     height:fit-content;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     overflow:hidden;
     flex-wrap: wrap;
     row-gap: 4vw;
     background-color: var(--main-background);
     border-radius: 15px;
+    gap:5vw;
 }
 .card{
     width:25vw;
@@ -70,4 +70,12 @@ main{
     padding-left:7vw;
     color:brown;
     font-size: 0.8rem;
+}
+.btn-add{
+    margin:3vh 0 3vh 0;
+    background-color:var(--Secondary-background-color);
+    border:none;
+    height:5vh;
+    width:fit-content;
+    box-shadow: inset 0px 0px 3px  rgba(138, 12, 255, 0.922);
 }

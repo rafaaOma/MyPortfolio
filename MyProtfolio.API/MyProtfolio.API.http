@@ -2,6 +2,7 @@
 
 # GET {{MyProtfolio.API_HostAddress}}/weatherforecast/
 # Accept: application/json
-GET http://localhost:5276/api/SkillsModification/Delete/{id=11}
+GET http://localhost:5276/api/Project/GetAll
+Accept: application/json
 
 ###

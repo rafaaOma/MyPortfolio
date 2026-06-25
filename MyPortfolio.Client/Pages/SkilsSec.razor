@@ -105,7 +105,7 @@
                         <div class="myS">
                              @foreach (SkillItem skill in DatabaseSkills)
                             {
-                            <div class="skill" @key="skill.Id">
+                            <div class="skill" @key="skill">
                                 @if (skill.IsEditing)
                                 { 
                                         <InputText class="input" @bind-Value="skill.Name" placeholder="Enter.." />

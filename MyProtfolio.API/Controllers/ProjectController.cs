@@ -14,6 +14,47 @@ namespace ProjectController.Controllers
             _context = context;
         }
 
+        [HttpPost("Create")]
+        public async Task<ActionResult<Project>> Create(Project project)
+        {
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
+
+            return Ok(project);
+        }
+        
+        [HttpDelete("DeleteProject/{id}")]
+        public async Task<ActionResult<Project>> DeleteProject(int id)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Images) //include all project sections
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (project == null)
+                return NotFound("Project not found");
+
+            // delete images from server
+            foreach (var img in project.Images)
+            {
+                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", img.ImageUrl);
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+            }
+
+            // delete images from database
+            _context.ProjectImages.RemoveRange(project.Images);
+            
+            //delete the project
+            _context.Projects.Remove(project);
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Deleted successfully");
+        }
+
         [HttpGet("GetAll")]
         public async Task<ActionResult<List<Project>>> GetAll()
         {
@@ -25,30 +66,46 @@ namespace ProjectController.Controllers
             return Ok(projects);
         }
 
+       //photos EndPoints
         [HttpPost("UploadImage/{projectId}")]
         public async Task<IActionResult> UploadImage(int projectId, IFormFile file)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest();
+        // 1. Validate file
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded");
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);//uniqe name for image
-            var path = Path.Combine("wwwroot/images", fileName);
+        // 2. Create images folder if it doesn't exist
+        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
 
-            using (var stream = new FileStream(path, FileMode.Create))//move file to server
-            {
-                await file.CopyToAsync(stream);
-            }
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
 
-            var image = new ProjectImage
-            {
-                ImageUrl = $"images/{fileName}",
-                ProjectId = projectId
-            };
+        // 3. Generate unique file name
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
-            _context.ProjectImages.Add(image);
-            await _context.SaveChangesAsync();
+        // 4. Full physical path
+        var fullPath = Path.Combine(folderPath, fileName);
 
-            return Ok(image);
+        // 5. Save file to server
+        using (var stream = new FileStream(fullPath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // 6. Save to database
+        var image = new ProjectImage
+        {
+            ImageUrl = $"images/{fileName}", // matches folder
+            ProjectId = projectId
+        };
+
+        _context.ProjectImages.Add(image);
+        await _context.SaveChangesAsync();
+
+        // 7. Return result
+        return Ok(image);
         }
         [HttpDelete("DeleteImage/{id}")]
         public async Task<IActionResult> DeleteImage(int id)

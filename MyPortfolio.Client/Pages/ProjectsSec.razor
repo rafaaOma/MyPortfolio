@@ -17,34 +17,38 @@
             {
                 <div class ="card"  @key="project.Id">
 
-
                     <!--project images-->
                     <div class="images">
-                    <AuthorizeView Roles="Admin"> 
-                            <Authorized>
-                                <label class="image-upload">
-                                    Click to upload images
-                                    <InputFile multiple OnChange="(e) => HandleFiles(e, project)" style="display:none" />
-                                </label>
-                            </Authorized> 
-                        </AuthorizeView>
-                    @if (project.Images.Any())
-                        {
-                            <div class=control-image>
-                                <button @onclick="() => PrevImage(project)">⬅</button>
-                                <img class="proj-image" src="@($"https://localhost:5276/{project.Images[project.CurrentImageIndex].ImageUrl}")" />
-                                <button @onclick="() => DeleteImage(project, project.Images[project.CurrentImageIndex])">❌</button>
-                                <button @onclick="() =>  NextImage(project)">➡</button>
-                            </div>
-                        }
+                        <AuthorizeView Roles="Admin"> 
+                                <Authorized>
+                                    <label class="image-upload">
+                                        Click to upload images
+                                        <InputFile multiple OnChange="(e) => HandleFiles(e, project)" />
+                                    </label>
+                                </Authorized> 
+                            </AuthorizeView>
+                        @if (project.Images.Any())
+                            {
+                                var currentImage = project.Images[project.CurrentImageIndex];
+                                <div class=control-image>
+                                    <button @onclick="() => PrevImage(project)">⬅</button>
+                                    <img class="proj-image" src="@($"http://localhost:5276/{currentImage.ImageUrl}")"  />
+                                    <button @onclick="() =>  NextImage(project)">➡</button>
+                                </div>
+                                <AuthorizeView Roles="Admin">
+                                    <Authorized>
+                                        <button class="del-btn" @onclick="() => DeleteImage(project, currentImage)"><i class='bx bx-trash'></i</button>
+                                    </Authorized>
+                                </AuthorizeView>
+                            }
                     </div>
 
 
                     <!--project name-->
-                    <div class="proj-name">
+                  <!--  <div class="proj-name">
                         <AuthorizeView Roles="Admin">
                             <Authorized>
-                                @if (project.IsEditing)
+                                @* @if (project.IsEditing)
                                     {
                                         <input type="text" @bind="project.projectName" placeholder="Enter project name.." />
 
@@ -105,8 +109,14 @@
                             <button @onclick="() => AddSkill(project)">➕ Add Skill</button>
                         </Authorized>
                     </AuthorizeView>
-                </div>
-            </div> 
+                </div> *@
+              --> 
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <button class="del-proj-btn" @onclick="() => DeleteProject(project)">DELETE PROJECT</button>
+                        </Authorized>
+                    </AuthorizeView>
+                </div> 
             }       
         </div>
     </div>
@@ -116,11 +126,17 @@
 @code {
 
     private List<Project> Projects = new();
+    string BaseUrl = "http://localhost:5276/";
     private int counter = 1;
     protected override async Task OnInitializedAsync()//uploding the projects list from database
     {
         Projects = await Http.GetFromJsonAsync<List<Project>>("api/Project/GetAll")
                 ?? new List<Project>();
+    }
+
+    string GetImageUrl(string path) 
+    {
+        return $"{BaseUrl}{path}"; 
     }
 
 async Task HandleFiles(InputFileChangeEventArgs e, Project project)
@@ -151,58 +167,76 @@ async Task HandleFiles(InputFileChangeEventArgs e, Project project)
         }
     }
 }
-async Task DeleteImage(Project project, ProjectImage image)
-{
-    await Http.DeleteAsync($"api/Project/DeleteImage/{image.Id}");
-
-    project.Images.Remove(image);
-
-    if (project.CurrentImageIndex >= project.Images.Count)
-        project.CurrentImageIndex = 0;
-}
-
-    void NextImage(Project project)
+    async Task DeleteImage(Project project, ProjectImage image)
     {
-        if (project.Images.Count == 0) return;
+        await Http.DeleteAsync($"api/Project/DeleteImage/{image.Id}");
 
-        project.CurrentImageIndex++;
+        project.Images.Remove(image);
 
         if (project.CurrentImageIndex >= project.Images.Count)
             project.CurrentImageIndex = 0;
     }
 
+    void NextImage(Project project)
+    {
+        if (!project.Images.Any()) return;
+
+        project.CurrentImageIndex = (project.CurrentImageIndex + 1) % project.Images.Count;
+    }
+
     void PrevImage(Project project)
     {
-        if (project.Images.Count == 0) return;
-
-        project.CurrentImageIndex--;
-
-        if (project.CurrentImageIndex < 0)
-            project.CurrentImageIndex = project.Images.Count - 1;
+        if (!project.Images.Any()) return; 
+        
+        project.CurrentImageIndex = (project.CurrentImageIndex - 1 + project.Images.Count) % project.Images.Count;
     }
 
-    protected async Task Saveinfo(){
+    @* protected async Task Saveinfo(){
 
-    }
-    void AddNewproject()
+    } *@
+    async Task AddNewproject()
     {
 
-        Projects.Add(new Project
+        var newProject = new
         {
-            Id = counter++,
-            projectName = "",
-            Description = "",
-            Skills = new List<Skill>()
-        });
+            ProjectName = "New Project",
+            Description = "Description here"
+        };
+
+        var res = await Http.PostAsJsonAsync("api/Project/Create", newProject);
+
+        if (!res.IsSuccessStatusCode)
+        {
+            Console.WriteLine(await res.Content.ReadAsStringAsync());
+            return;
+        }
+
+        var created = await res.Content.ReadFromJsonAsync<Project>();
+
+        if (created != null)
+            Projects.Add(created);
     }
 
-    void UpdateProjectName(Project project)
+    async Task DeleteProject(Project project){
+    var response = await Http.DeleteAsync($"http://localhost:5276/api/Project/DeleteProject/{project.Id}");
+
+    if (response.IsSuccessStatusCode)
+    {
+        //delete from list Projects the project
+        Projects.Remove(project);
+    }
+    else
+    {
+        Console.WriteLine("Delete failed");
+    }
+    }
+    @* void UpdateProjectName(Project project)
     {
         project.IsEditing = false;
         StateHasChanged();
-    }
+    } *@
 
-    void ClearProjectName(Project project)
+    @* void ClearProjectName(Project project)
     {
         project.projectName = "";
         StateHasChanged();
@@ -222,22 +256,22 @@ async Task DeleteImage(Project project, ProjectImage image)
     {
         project.IsEditing = true;
         StateHasChanged();
-    }
+    } *@
 
     class Project{
-        public string projectName=""; //project name
-        public int Id; //project id
-        public bool IsEditing=false; //for modification on specific project
-        public string Description=""; //project description
-        public List<Skill> Skills = new(); //skills learnd in project
+        @* public string projectName=""; //project name *@
+        public int Id { get; set; } //project id
+        @* public bool IsEditing=false; //for modification on specific project
+        public string Description=""; //project description *@
+        @* public List<Skill> Skills = new(); //skills learnd in project *@
         public List<ProjectImage> Images { get; set; } = new(); //images for project
-        public int CurrentImageIndex = 0;  //image index for specific image in list images in project
+        public int CurrentImageIndex  { get; set; }= 0;  //image index for specific image in list images in project
     }
 
-    class Skill
+    @* class Skill
     {
         public string Name = "";
-    }
+    } *@
     public class ProjectImage
     {
         public int Id { get; set; }

@@ -38,13 +38,14 @@ main{
     height:60vh;
     background-color: transparent;
     border-radius: 15px;
-    box-shadow:inset 0px 0px 5px var( --Third-text-color) ;
+    box-shadow:inset 0px 0px 8px rgba(138, 12, 255, 0.922);
     border:none;
 }
 .proj-image{
     width:18vw;
     height:26vh;
     border-radius: 15px;
+    margin:2vw 0vh;
 }
 .control-image{
     display: flex;
@@ -57,20 +58,23 @@ main{
     width: fit-content;
     height:fit-content;
     background-color: inherit;
-    color: var( --Third-text-color);
+    color: var(--Secondary-background-color);
+    border:none;
+    font-size: 1.3rem;
     border-radius: 20px;
-    border-color:var( --Third-text-color);
-    box-shadow:inset 1px 0px 5px var( --Third-text-color) ;
-    font-size: 1.2rem;
+    box-shadow:inset 0 0 3px  rgba(138, 12, 255, 0.922);
 }
 .control-image button:hover{
-    background-color: var( --hover-col);
+    background-color: var(--Secondary-background-color);
+    color:#502D55;
 }
 .image-upload{
     padding-left:7vw;
     color:brown;
     font-size: 0.8rem;
+    margin:1vh 0vw;
 }
+
 .btn-add{
     margin:3vh 0 3vh 0;
     background-color:var(--Secondary-background-color);
@@ -78,4 +82,23 @@ main{
     height:5vh;
     width:fit-content;
     box-shadow: inset 0px 0px 3px  rgba(138, 12, 255, 0.922);
+}
+.del-btn{
+    position: absolute;
+    top:5vh;
+    background-color:rgba(174, 172, 172, 0.701);
+    left:18vw;
+    font-size: 1rem;
+    color:black;
+}
+.del-proj-btn{
+    width:fit-content;
+    height:fit-content;
+    background-color:var(--Secondary-background-color) ;
+    box-shadow:  inset 0px 0px 8px  rgba(138, 12, 255, 0.922);
+    position: absolute;
+    right:0;
+    bottom:0;
+    margin:2vh 1vw;
+    color: red;
 }

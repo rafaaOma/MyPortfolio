@@ -17,16 +17,16 @@
             {
                 <div class ="card"  @key="project.Id">
 
+
                     <!--project images-->
                     <div class="images">
                         <AuthorizeView Roles="Admin"> 
-                                <Authorized>
-                                    <label class="image-upload">
-                                        Click to upload images
-                                        <InputFile multiple OnChange="(e) => HandleFiles(e, project)" />
-                                    </label>
-                                </Authorized> 
-                            </AuthorizeView>
+                            <Authorized>
+                                <label class="image-upload">
+                                    <InputFile multiple OnChange="(e) => HandleFiles(e, project)"/>
+                                </label>
+                            </Authorized> 
+                        </AuthorizeView>
                         @if (project.Images.Any())
                             {
                                 var currentImage = project.Images[project.CurrentImageIndex];
@@ -41,19 +41,19 @@
                                     </Authorized>
                                 </AuthorizeView>
                             }
-                    </div>
+                </div>
 
 
                     <!--project name-->
-                  <!--  <div class="proj-name">
-                        <AuthorizeView Roles="Admin">
-                            <Authorized>
-                                @* @if (project.IsEditing)
-                                    {
-                                        <input type="text" @bind="project.projectName" placeholder="Enter project name.." />
+                <div class="proj-name">
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            @if (project.IsEditing || string.IsNullOrWhiteSpace(project.ProjectName))
+                                {
+                                        <input type="text" calss="proj-input" @bind="project.ProjectName" placeholder="Enter project name.." />
 
                                         <div class="alter-btn">
-                                            <button class="save" @onclick="() => UpdateProjectName(project)">
+                                            <button class="save" disabled="@string.IsNullOrWhiteSpace(project.ProjectName)" @onclick="() => UpdateProjectName(project)">
                                                 <i class="bx bx-check"></i>
                                             </button>
 
@@ -64,19 +64,21 @@
                                     }
                                     else
                                     {
-                                        <h4 class="proj-title"
+                                        <h5 class="proj-title"
                                             @onclick="() => EnableEdit(project)">
-                                            @project.projectName
-                                        </h4>
+                                            @project.ProjectName
+                                        </h5>
                                     }    
-                                </Authorized>
-                                <NotAuthorized>
-                                    <h4 class="proj-title">
-                                        @project.projectName
-                                    </h4>
-                                </NotAuthorized>
-                            </AuthorizeView>
-                    </div> 
+                        </Authorized>
+                        <NotAuthorized>
+                                    <h5 class="proj-title">
+                                        @project.ProjectName
+                                    </h5>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>  
+
+@*   <!-- 
                 <p class="proj-description">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
@@ -110,7 +112,6 @@
                         </Authorized>
                     </AuthorizeView>
                 </div> *@
-              --> 
                     <AuthorizeView Roles="Admin">
                         <Authorized>
                             <button class="del-proj-btn" @onclick="() => DeleteProject(project)">DELETE PROJECT</button>
@@ -139,34 +140,34 @@
         return $"{BaseUrl}{path}"; 
     }
 
-async Task HandleFiles(InputFileChangeEventArgs e, Project project)
-{
-    foreach (var file in e.GetMultipleFiles())
+    async Task HandleFiles(InputFileChangeEventArgs e, Project project)
     {
-        var content = new MultipartFormDataContent();
-
-        var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
-        var fileContent = new StreamContent(stream);
-
-        fileContent.Headers.ContentType =
-            new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-
-        content.Add(fileContent, "file", file.Name);
-
-        var response = await Http.PostAsync(
-            $"api/Project/UploadImage/{project.Id}", content);
-
-        if (response.IsSuccessStatusCode)
+        foreach (var file in e.GetMultipleFiles())
         {
-            var newImage = await response.Content.ReadFromJsonAsync<ProjectImage>();
+            var content = new MultipartFormDataContent();
 
-            if (newImage != null)
+            var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
+            var fileContent = new StreamContent(stream);
+
+            fileContent.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(fileContent, "file", file.Name);
+
+            var response = await Http.PostAsync(
+                $"api/Project/UploadImage/{project.Id}", content);
+
+            if (response.IsSuccessStatusCode)
             {
-                project.Images.Add(newImage); 
+                var newImage = await response.Content.ReadFromJsonAsync<ProjectImage>();
+
+                if (newImage != null)
+                {
+                    project.Images.Add(newImage); 
+                }
             }
         }
     }
-}
     async Task DeleteImage(Project project, ProjectImage image)
     {
         await Http.DeleteAsync($"api/Project/DeleteImage/{image.Id}");
@@ -217,31 +218,55 @@ async Task HandleFiles(InputFileChangeEventArgs e, Project project)
             Projects.Add(created);
     }
 
-    async Task DeleteProject(Project project){
-    var response = await Http.DeleteAsync($"http://localhost:5276/api/Project/DeleteProject/{project.Id}");
+  
+    async Task DeleteProject(Project project){  //delete hole project
 
-    if (response.IsSuccessStatusCode)
-    {
-        //delete from list Projects the project
-        Projects.Remove(project);
+        var response = await Http.DeleteAsync($"http://localhost:5276/api/Project/DeleteProject/{project.Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            //delete from list Projects the project
+            Projects.Remove(project);
+        }
+        else
+        {
+            Console.WriteLine("Delete failed");
+        }
     }
-    else
+    async Task UpdateProjectName(Project project)
     {
-        Console.WriteLine("Delete failed");
+
+        if (string.IsNullOrWhiteSpace(project.ProjectName))
+        {
+            Console.WriteLine("Project name cannot be empty");
+            return;
+        }
+
+        var response = await Http.PutAsJsonAsync(
+            $"api/Project/UpdateName/{project.Id}",
+            project.ProjectName
+        );
+
+        if (response.IsSuccessStatusCode)
+        {
+            var updatedProject = await response.Content.ReadFromJsonAsync<Project>();
+
+            project.ProjectName = updatedProject.ProjectName;
+
+            project.IsEditing = false;
+        }
+        else
+        {
+            Console.WriteLine("Update failed");
+        }
     }
-    }
-    @* void UpdateProjectName(Project project)
+
+   void ClearProjectName(Project project)
     {
-        project.IsEditing = false;
+        project.ProjectName = "";
         StateHasChanged();
-    } *@
-
-    @* void ClearProjectName(Project project)
-    {
-        project.projectName = "";
-        StateHasChanged();
     }
-
+ @* 
     void AddSkill(Project project)
     {
         project.Skills.Add(new Skill { Name = "" });
@@ -251,18 +276,18 @@ async Task HandleFiles(InputFileChangeEventArgs e, Project project)
     {
         project.Skills.Remove(skill);
     }
-
+*@
     void EnableEdit(Project project)
     {
         project.IsEditing = true;
         StateHasChanged();
-    } *@
+    } 
 
     class Project{
-        @* public string projectName=""; //project name *@
+        public string ProjectName { get; set; } = ""; //project name
         public int Id { get; set; } //project id
-        @* public bool IsEditing=false; //for modification on specific project
-        public string Description=""; //project description *@
+        public bool IsEditing { get; set; } = false; //for modification on specific project
+       @*  public string Description=""; //project description *@
         @* public List<Skill> Skills = new(); //skills learnd in project *@
         public List<ProjectImage> Images { get; set; } = new(); //images for project
         public int CurrentImageIndex  { get; set; }= 0;  //image index for specific image in list images in project

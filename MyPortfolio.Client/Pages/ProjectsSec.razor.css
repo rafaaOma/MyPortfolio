@@ -45,7 +45,7 @@ main{
     width:18vw;
     height:26vh;
     border-radius: 15px;
-    margin:2vw 0vh;
+    margin-top:2.6vh;
 }
 .control-image{
     display: flex;
@@ -69,12 +69,11 @@ main{
     color:#502D55;
 }
 .image-upload{
-    padding-left:7vw;
-    color:brown;
+    padding-left:3vw;
+    color:red;
     font-size: 0.8rem;
-    margin:1vh 0vw;
+    margin:2vh 0vw;
 }
-
 .btn-add{
     margin:3vh 0 3vh 0;
     background-color:var(--Secondary-background-color);
@@ -85,7 +84,8 @@ main{
 }
 .del-btn{
     position: absolute;
-    top:5vh;
+    bottom:28vh;
+    margin-right: 2vw;
     background-color:rgba(174, 172, 172, 0.701);
     left:18vw;
     font-size: 1rem;
@@ -101,4 +101,31 @@ main{
     bottom:0;
     margin:2vh 1vw;
     color: red;
+}
+.proj-name{
+    display:flex;
+    flex-direction: row;
+    position:relative;
+    margin:2.5vh 1.5vw;
+}
+.alter-btn{
+    position:absolute;
+    right:6.1vw;
+    display: flex;
+    top:0.5vh;
+}
+.proj-input{
+    width: 100%;
+    overflow: hidden;
+}
+.proj-name .save,
+.proj-name .delete-btn{
+    border:none;
+    background:transparent;
+}
+.proj-title{
+    color:var(--mainfont-color);
+    font-style:italic;
+    font-weight:500px;
+    padding:0.3vw 2vw;
 }

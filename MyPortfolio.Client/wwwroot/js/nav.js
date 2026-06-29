@@ -30,7 +30,7 @@ window.initNavObserver = () => {
         }
 
     }, {
-        threshold: [0.2, 0.4, 0.6, 0.8]
+        threshold: [0.6, 0.8]
     });
 
     sections.forEach(sec => observer.observe(sec));

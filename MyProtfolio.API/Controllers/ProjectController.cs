@@ -70,11 +70,11 @@ namespace ProjectController.Controllers
         [HttpPost("UploadImage/{projectId}")]
         public async Task<IActionResult> UploadImage(int projectId, IFormFile file)
         {
-        // 1. Validate file
+        // Validate file
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded");
 
-        // 2. Create images folder if it doesn't exist
+        //Create images folder if it doesn't exist
         var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
 
         if (!Directory.Exists(folderPath))
@@ -82,19 +82,19 @@ namespace ProjectController.Controllers
             Directory.CreateDirectory(folderPath);
         }
 
-        // 3. Generate unique file name
+        //generate unique file name
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
-        // 4. Full physical path
+        // Full physical path
         var fullPath = Path.Combine(folderPath, fileName);
 
-        // 5. Save file to server
+        //Save file to server
         using (var stream = new FileStream(fullPath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // 6. Save to database
+        //Save to database
         var image = new ProjectImage
         {
             ImageUrl = $"images/{fileName}", // matches folder
@@ -104,7 +104,7 @@ namespace ProjectController.Controllers
         _context.ProjectImages.Add(image);
         await _context.SaveChangesAsync();
 
-        // 7. Return result
+        //Return result
         return Ok(image);
         }
         [HttpDelete("DeleteImage/{id}")]
@@ -125,5 +125,26 @@ namespace ProjectController.Controllers
 
             return Ok();
         }
+
+        //Name EndPoints for edit name update and delete
+        [HttpPut("UpdateName/{id}")]
+        public async Task<IActionResult> UpdateName(int id, [FromBody] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return BadRequest("Name cannot be empty");
+
+            var project = await _context.Projects.FindAsync(id);
+
+            if (project == null)
+                return NotFound();
+
+            project.ProjectName = name;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(project);
+        }
+
+        
     }
 }

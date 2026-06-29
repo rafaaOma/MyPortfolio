@@ -5,9 +5,9 @@ main{
 .about-me-section{
     display:flex;
     flex-direction:row;
-    justify-content: space-around;
-    margin-top: 15vh;
-    margin-bottom:10vh ;
+    margin-bottom:5vh;
+    margin: 0vw 10vh;
+    gap:10vw;
 }
 .pargraph-section{
     display: flex;
@@ -26,4 +26,9 @@ p{
     word-spacing: 0.2vw;
     line-height: 1.8;
     /* text-shadow: 0 0 8px rgba(138, 12, 255, 0.922); */
+    font-size: 1rem;
+}
+.animation-section{
+  margin-right: 8vw;
+  margin-top: 5vh;
 }

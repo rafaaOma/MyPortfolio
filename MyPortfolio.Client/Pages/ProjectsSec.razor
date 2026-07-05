@@ -31,9 +31,13 @@
                             {
                                 var currentImage = project.Images[project.CurrentImageIndex];
                                 <div class=control-image>
-                                    <button @onclick="() => PrevImage(project)">⬅</button>
+                                    <button class="ctrl-image-left" @onclick="() => PrevImage(project)">
+                                        <i class='bx bx-chevron-left'></i>
+                                    </button>
                                     <img class="proj-image" src="@($"http://localhost:5276/{currentImage.ImageUrl}")"  />
-                                    <button @onclick="() =>  NextImage(project)">➡</button>
+                                    <button class="ctrl-image-right" @onclick="() =>  NextImage(project)">
+                                        <i class='bx bx-chevron-right'></i>
+                                    </button>
                                 </div>
                                 <AuthorizeView Roles="Admin">
                                     <Authorized>
@@ -44,7 +48,7 @@
                 </div>
 
 
-                    <!--project name-->
+                <!--project name-->
                 <div class="proj-name">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
@@ -78,17 +82,39 @@
                     </AuthorizeView>
                 </div>  
 
-@*   <!-- 
-                <p class="proj-description">
+                <!--project description-->
+                <div class="proj-description">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
-                            <textarea @bind="project.Description" placeholder="Enter description..."></textarea>
+                             @if (project.IsEditing || string.IsNullOrWhiteSpace(project.Description))
+                             {
+                                <textarea class="proj-textarea" @bind="project.Description" placeholder="Enter description..."></textarea>
+                                <div class="alter-btn">
+                                            <button class="save" disabled="@string.IsNullOrWhiteSpace(project.Description)" @onclick="() => UpdateProjectDescription(project)">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+
+                                            <button class="delete-btn" @onclick="() => ClearProjectDescription(project)">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                </div>
+                             }else
+                             {
+                                <p class="proj-view-description"
+                                    @onclick="() => EnableEdit(project)">
+                                    @project.Description
+                                 </p>
+                             }
+                            
                         </Authorized>
                         <NotAuthorized>
-                            <p class="proj-description">@project.Description</p>
+                            <p class="proj-view-description">
+                                @project.Description
+                            </p>
                         </NotAuthorized>
                     </AuthorizeView>
-                </p>
+                </div>
+                @*   <!-- 
                 <div class=proj-skills>
                     @foreach (var skill in project.Skills)
                     {
@@ -266,6 +292,41 @@
         project.ProjectName = "";
         StateHasChanged();
     }
+
+    // update and add project discription
+    async Task UpdateProjectDescription(Project project)
+    {
+
+        if (string.IsNullOrWhiteSpace(project.Description))
+        {
+            Console.WriteLine("Project description cannot be empty");
+            return;
+        }
+
+        var response = await Http.PutAsJsonAsync(
+            $"api/Project/UpdateDescription/{project.Id}",
+            project.Description
+        );
+
+        if (response.IsSuccessStatusCode)
+        {
+            var updatedProject = await response.Content.ReadFromJsonAsync<Project>();
+
+            project.Description = updatedProject.Description;
+
+            project.IsEditing = false;
+        }
+        else
+        {
+            Console.WriteLine("Update failed");
+        }
+    }
+
+       void ClearProjectDescription(Project project)
+    {
+        project.Description = "";
+        StateHasChanged();
+    }
  @* 
     void AddSkill(Project project)
     {
@@ -287,7 +348,7 @@
         public string ProjectName { get; set; } = ""; //project name
         public int Id { get; set; } //project id
         public bool IsEditing { get; set; } = false; //for modification on specific project
-       @*  public string Description=""; //project description *@
+        public string Description { get;set; } = ""; //project description
         @* public List<Skill> Skills = new(); //skills learnd in project *@
         public List<ProjectImage> Images { get; set; } = new(); //images for project
         public int CurrentImageIndex  { get; set; }= 0;  //image index for specific image in list images in project

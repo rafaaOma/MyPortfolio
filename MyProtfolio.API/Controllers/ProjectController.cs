@@ -145,6 +145,23 @@ namespace ProjectController.Controllers
             return Ok(project);
         }
 
-        
+        //Description EndPoints for edit project Description update and delete
+        [HttpPut("UpdateDescription/{id}")]
+        public async Task<IActionResult> UpdateDescription(int id, [FromBody] string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return BadRequest("description cannot be empty");
+
+            var project = await _context.Projects.FindAsync(id);
+
+            if (project == null)
+                return NotFound();
+
+            project.Description = description;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(project);
+        }
     }
 }

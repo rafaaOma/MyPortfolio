@@ -9,7 +9,8 @@ namespace MyProtfolio.API.Data{
         public DbSet<Admin> Admins {get; set;} //admin info
         public DbSet<Skill> Skills { get; set; } //skills table
         public DbSet<Project> Projects { get; set; } //project table
-        public DbSet<ProjectImage> ProjectImages { get; set; } //projec timages
+        public DbSet<ProjectImage> ProjectImages { get; set; } //projec images
+        public DbSet<ProjectSkill> ProjectSkills { get; set; } //project skills table
 
         public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options) : base(options)
         {

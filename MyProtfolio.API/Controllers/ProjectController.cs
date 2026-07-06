@@ -55,7 +55,8 @@ namespace ProjectController.Controllers
             return Ok("Deleted successfully");
         }
 
-        [HttpGet("GetAll")]
+
+      [HttpGet("GetAll")]
         public async Task<ActionResult<List<Project>>> GetAll()
         {
             var projects = await _context.Projects
@@ -65,7 +66,7 @@ namespace ProjectController.Controllers
 
             return Ok(projects);
         }
-
+        
        //photos EndPoints
         [HttpPost("UploadImage/{projectId}")]
         public async Task<IActionResult> UploadImage(int projectId, IFormFile file)
@@ -115,7 +116,7 @@ namespace ProjectController.Controllers
             if (image == null)
                 return NotFound();
 
-            var path = Path.Combine("wwwroot/images", image.ImageUrl);
+            var path = Path.Combine("wwwroot", image.ImageUrl);
             
             if (System.IO.File.Exists(path))
                 System.IO.File.Delete(path);
@@ -162,6 +163,77 @@ namespace ProjectController.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(project);
+        }
+
+        //for skills adding new skill, update, delete.
+        [HttpPost("{projectId}/skills")]
+        public async Task<IActionResult> AddProjectSkill(int projectId,[FromBody] ProjectSkillDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.SkillName))
+                return BadRequest("Skill name cannot be empty");
+
+            var project = await _context.Projects.FindAsync(projectId);
+
+            if (project == null)
+                return NotFound("Project not found");
+
+            var skill = new ProjectSkill
+            {
+                Name = dto.SkillName,
+                ProjectId = projectId
+            };
+
+            _context.ProjectSkills.Add(skill);
+            await _context.SaveChangesAsync();
+
+            return Ok(skill);
+        }
+
+
+        [HttpPut("skills/{id}")]
+        public async Task<IActionResult> UpdateProjectSkill(int id, [FromBody] ProjectSkillDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.SkillName))
+                return BadRequest("Skill name cannot be empty");
+
+            var skill = await _context.ProjectSkills.FindAsync(id);
+
+            if (skill == null)
+                return NotFound("Skill not found");
+
+            skill.Name = dto.SkillName;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(skill);
+        }
+
+
+        [HttpDelete("skills/{id}")]
+        public async Task<IActionResult> DeleteProjectSkill(int id)
+        {
+            var skill = await _context.ProjectSkills.FindAsync(id);
+
+            if (skill == null)
+                return NotFound("Skill not found");
+
+            _context.ProjectSkills.Remove(skill);
+            await _context.SaveChangesAsync();
+
+            return Ok("Deleted successfully");
+        }
+
+        [HttpGet("{projectId}/skills")]
+        public async Task<IActionResult> GetProjectSkills(int projectId)
+        {
+            var project = await _context.Projects
+                .Include(p => p.Skills)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+                return NotFound("Project not found");
+
+            return Ok(project.Skills);
         }
     }
 }

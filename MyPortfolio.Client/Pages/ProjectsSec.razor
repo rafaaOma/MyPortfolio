@@ -105,7 +105,6 @@
                                     @project.Description
                                  </p>
                              }
-                            
                         </Authorized>
                         <NotAuthorized>
                             <p class="proj-view-description">
@@ -114,30 +113,54 @@
                         </NotAuthorized>
                     </AuthorizeView>
                 </div>
-                @*   <!-- 
-                <div class=proj-skills>
+                
+                <!--project skilles for each project-->
+                <div class="proj-skills">
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <button class="btn-add-skill" @onclick='() => AddProjectSkill(project)'>Add</button>
+                        </Authorized>
+                    </AuthorizeView>
+
                     @foreach (var skill in project.Skills)
                     {
-                        <div class="skill-item">
-                            <AuthorizeView Roles="Admin">
-                                <Authorized>
-                                    <input type="text" @bind="skill.Name" />
+                        <div class="skill-item" @key="skill">
 
-                                    <button @onclick="() => RemoveSkill(project, skill)">❌</button>
-                                </Authorized>
-                                <NotAuthorized>
-                                    <span>@skill.Name</span>
-                                </NotAuthorized>
-                            </AuthorizeView>
+                            @if (skill.IsEditing)
+                            {
+                                <input type="text" @bind="skill.Name" placeholder="Enter skill..." />
+
+                                <div class="alter-btn-skill">
+                                    <button @onclick="() => SaveProjectSkill(project, skill)">
+                                        <i class="bx bx-check"></i>
+                                    </button>
+
+                                    <button @onclick="() => RemoveProjectSkill(project, skill)">
+                                        <i class='bx bx-trash'></i>
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <AuthorizeView Roles="Admin">
+                                    <Authorized>
+                                        <span @onclick="() => EditProjectSkill(skill)" style="cursor:pointer">
+                                            @skill.Name
+                                        </span>
+                                    </Authorized>
+
+                                    <NotAuthorized>
+                                        <span>@skill.Name</span>
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            }
+
                         </div>
                     }
 
-                    <AuthorizeView Roles="Admin">
-                        <Authorized>
-                            <button @onclick="() => AddSkill(project)">➕ Add Skill</button>
-                        </Authorized>
-                    </AuthorizeView>
-                </div> *@
+                </div>
+
+                <!--delete the hole project-->
                     <AuthorizeView Roles="Admin">
                         <Authorized>
                             <button class="del-proj-btn" @onclick="() => DeleteProject(project)">DELETE PROJECT</button>
@@ -218,9 +241,6 @@
         project.CurrentImageIndex = (project.CurrentImageIndex - 1 + project.Images.Count) % project.Images.Count;
     }
 
-    @* protected async Task Saveinfo(){
-
-    } *@
     async Task AddNewproject()
     {
 
@@ -230,7 +250,7 @@
             Description = "Description here"
         };
 
-        var res = await Http.PostAsJsonAsync("api/Project/Create", newProject);
+        var res = await Http.PostAsJsonAsync($"api/Project/Create", newProject);
 
         if (!res.IsSuccessStatusCode)
         {
@@ -327,37 +347,99 @@
         project.Description = "";
         StateHasChanged();
     }
- @* 
-    void AddSkill(Project project)
+ 
+    // add and remove skills for each project
+    void AddProjectSkill(Project project) //add new skill
     {
-        project.Skills.Add(new Skill { Name = "" });
+        project.Skills.Add(new ProjectSkill
+        {
+            Name = "",
+            ProjectId = project.Id,
+            IsEditing = true
+        });
+
+        StateHasChanged();
+    }
+    async Task SaveProjectSkill(Project project, ProjectSkill skill)
+    {
+        if (string.IsNullOrWhiteSpace(skill.Name))
+            return;
+
+        HttpResponseMessage response;
+
+        if (skill.Id == 0)
+        {
+            // ADD
+            response = await Http.PostAsJsonAsync($"api/Project/{project.Id}/skills",  new { name = skill.Name });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var created = await response.Content.ReadFromJsonAsync<ProjectSkill>();
+                if (created != null)
+                    skill.Id = created.Id;
+            }
+        }
+        else
+        {
+            // UPDATE
+            response = await Http.PutAsJsonAsync($"api/Project/skills/{skill.Id}",  new { name = skill.Name });
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            skill.IsEditing = false;
+        }
+
+        StateHasChanged();
     }
 
-    void RemoveSkill(Project project, Skill skill)
+    async Task RemoveProjectSkill(Project project, ProjectSkill skill)
     {
-        project.Skills.Remove(skill);
+        if (skill.Id == 0)
+        {
+            project.Skills.Remove(skill);
+            return;
+        }
+
+        var response = await Http.DeleteAsync( $"api/Project/skills/{skill.Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            project.Skills.Remove(skill);
+        }
+
+        StateHasChanged();
     }
-*@
+    void EditProjectSkill(ProjectSkill skill)
+    {
+        skill.IsEditing = true;
+    }
+
     void EnableEdit(Project project)
     {
         project.IsEditing = true;
         StateHasChanged();
     } 
 
+
     class Project{
         public string ProjectName { get; set; } = ""; //project name
         public int Id { get; set; } //project id
         public bool IsEditing { get; set; } = false; //for modification on specific project
-        public string Description { get;set; } = ""; //project description
-        @* public List<Skill> Skills = new(); //skills learnd in project *@
+        public string Description { get; set; } = ""; //project description
+        public List<ProjectSkill> Skills { get; set; } = new(); //skills learnd in project
         public List<ProjectImage> Images { get; set; } = new(); //images for project
         public int CurrentImageIndex  { get; set; }= 0;  //image index for specific image in list images in project
     }
 
-    @* class Skill
+    class ProjectSkill
     {
-        public string Name = "";
-    } *@
+        public int Id { get; set; }
+        public string Name { get; set; }= "";
+        public int ProjectId { get; set; }
+        public bool IsEditing { get; set; } = false;
+
+    }
     public class ProjectImage
     {
         public int Id { get; set; }

@@ -35,7 +35,7 @@ main{
 }
 .card{
     width:25vw;
-    height:68vh;
+    height:80vh;
     background-color: transparent;
     border-radius: 15px;
     box-shadow:inset 0px 0px 8px rgba(138, 12, 255, 0.922);
@@ -115,7 +115,7 @@ main{
     display:flex;
     flex-direction: row;
     position:relative;
-    margin:5vh 1.5vw 0 1.5vw;
+    margin:4vh 1.5vw 0 1.5vw;
 }
 .alter-btn{
     position:absolute;
@@ -136,7 +136,7 @@ main{
     color:var(--mainfont-color);
     font-style:italic;
     font-weight:500px;
-    padding:0.3vw 1vw;
+    padding:0vw 1vw;
 }
 .proj-description{
     width: 100%;
@@ -156,5 +156,31 @@ main{
     height:fit-content;
     width:90%;
     margin-left: 1.5vw;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
+.proj-skills{
+    width:100%;
+    height:fit-content;
+    display:flex;
+    flex-direction:row;
+    flex-wrap: wrap;
+}
+.skill-item{
+    background-color: blanchedalmond;
+    box-shadow:  inset 0px 0px 8px  rgba(138, 12, 255, 0.922);
+    position:relative;
+    width:fit-content;
+}
+.alter-btn-skill{
+    position:absolute;
+    display: flex;
+    flex-direction: row;       
+    right:0;
+    top:1px;
+}
+.alter-btn-skill button{
+
+    border:none;
+    background-color:transparent;
+}
+

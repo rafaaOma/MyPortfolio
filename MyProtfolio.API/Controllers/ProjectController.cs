@@ -167,9 +167,9 @@ namespace ProjectController.Controllers
 
         //for skills adding new skill, update, delete.
         [HttpPost("{projectId}/skills")]
-        public async Task<IActionResult> AddProjectSkill(int projectId,[FromBody] ProjectSkillDto dto)
+        public async Task<IActionResult> AddProjectSkill(int projectId,[FromBody] string skillName)
         {
-            if (string.IsNullOrWhiteSpace(dto.SkillName))
+            if (string.IsNullOrWhiteSpace(skillName))
                 return BadRequest("Skill name cannot be empty");
 
             var project = await _context.Projects.FindAsync(projectId);
@@ -179,7 +179,7 @@ namespace ProjectController.Controllers
 
             var skill = new ProjectSkill
             {
-                Name = dto.SkillName,
+                Name = skillName,
                 ProjectId = projectId
             };
 
@@ -191,9 +191,9 @@ namespace ProjectController.Controllers
 
 
         [HttpPut("skills/{id}")]
-        public async Task<IActionResult> UpdateProjectSkill(int id, [FromBody] ProjectSkillDto dto)
+        public async Task<IActionResult> UpdateProjectSkill(int id, [FromBody] string skillName)
         {
-            if (string.IsNullOrWhiteSpace(dto.SkillName))
+            if (string.IsNullOrWhiteSpace(skillName))
                 return BadRequest("Skill name cannot be empty");
 
             var skill = await _context.ProjectSkills.FindAsync(id);
@@ -201,7 +201,7 @@ namespace ProjectController.Controllers
             if (skill == null)
                 return NotFound("Skill not found");
 
-            skill.Name = dto.SkillName;
+            skill.Name = skillName;
 
             await _context.SaveChangesAsync();
 

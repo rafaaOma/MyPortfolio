@@ -8,3 +8,10 @@ Accept: application/json
 ####
 GET http://localhost:5276/api/Project/DeleteImage/{8}
 Accept: application/json
+
+####
+POST http://localhost:5276/api/Project/10/skills
+Body:
+{
+  "skillName": "C#"
+}

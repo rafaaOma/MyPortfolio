@@ -13,7 +13,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("BlazorPolicy",
         policy => policy.WithOrigins("http://localhost:5159")
                         .AllowAnyHeader()
-                        .AllowAnyMethod());
+                        .AllowAnyMethod()
+                        .AllowCredentials());
 });
 
 builder.Services.AddOpenApi();
@@ -53,9 +54,12 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+app.UseRouting();
 
 app.UseCors("BlazorPolicy");
+
+app.UseStaticFiles();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

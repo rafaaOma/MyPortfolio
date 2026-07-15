@@ -150,15 +150,71 @@
                                     </Authorized>
 
                                     <NotAuthorized>
-                                        <span class="skillItself">@skill.Name</span>
+                                        <span >@skill.Name</span>
                                     </NotAuthorized>
                                 </AuthorizeView>
                             }
 
                         </div>
                     }
-
                 </div>
+
+                <!--Github url section-->
+                <div class="proj-git-sec">
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            @if (project.IsEditing)
+                            {
+                                <input @bind="project.ProjectUrl" class="git-input" />
+
+                                <div class="alter-btn-url">
+                                    <button class="save"
+                                            disabled="@string.IsNullOrWhiteSpace(project.ProjectUrl)"
+                                            @onclick="() => AddProjectGitUrl(project)">
+                                        ✔
+                                    </button>
+
+                                    <button class="delete-btn"
+                                            @onclick="() => ClearProjectUrl(project)">
+                                        🗑
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                @if (!string.IsNullOrWhiteSpace(project.ProjectUrl))
+                                {
+                                
+                                    <a class="proj-view-url"
+                                    href="@project.ProjectUrl"
+                                    target="_blank">
+                                          <i class="bx bxl-github"></i> View on GitHub
+                                    </a>
+                                    <span>
+                                        <i class="bx bx-chevrons-right"></i>
+                                    </span>
+                                
+                                }
+                            }
+                        </Authorized>
+                         <NotAuthorized>
+                             @if (!string.IsNullOrWhiteSpace(project.ProjectUrl))
+                            {
+                               
+                                <a class="proj-view-url"
+                                href="@project.ProjectUrl"
+                                target="_blank">
+                                    <i class="bx bxl-github"></i> View on GitHub
+                                </a>
+                                 <span>
+                                        <i class="bx bx-chevrons-right"></i>
+                                </span>
+                        
+                            }
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+
 
                 <!--delete the hole project-->
                     <AuthorizeView Roles="Admin">
@@ -433,6 +489,47 @@
         skill.IsEditing = true;
     }
 
+    //delete, update and adding github url for each project
+
+    bool IsValidUrl(string url)
+    {
+        return Uri.TryCreate(url, UriKind.Absolute, out var result)
+            && (result.Scheme == "http" || result.Scheme == "https");
+    }
+    async Task AddProjectGitUrl(Project project)
+    {
+        if (!string.IsNullOrWhiteSpace(project.ProjectUrl) && !IsValidUrl(project.ProjectUrl))
+        {
+            Console.WriteLine("Project URL cannot be empty");
+            return;
+        }
+
+        var response = await Http.PutAsJsonAsync(
+            $"api/Project/ProjectURL/{project.Id}",
+            project.ProjectUrl
+        );
+
+        if (response.IsSuccessStatusCode)
+        {
+            var updatedProject = await response.Content.ReadFromJsonAsync<Project>();
+
+            project.ProjectUrl = updatedProject.ProjectUrl;
+
+            project.IsEditing = false;
+        }
+        else
+        {
+            Console.WriteLine("Update failed");
+        }
+    }
+
+    //clear project URL
+    void ClearProjectUrl(Project project)
+    {
+        project.ProjectUrl = "";
+        StateHasChanged();
+    }
+
     void EnableEdit(Project project)
     {
         project.IsEditing = true;
@@ -447,6 +544,7 @@
         public string Description { get; set; } = ""; //project description
         public List<ProjectSkill> Skills { get; set; } = new(); //skills learnd in project
         public List<ProjectImage> Images { get; set; } = new(); //images for project
+        public string ProjectUrl { get; set; } = ""; //github url for project
         public int CurrentImageIndex  { get; set; }= 0;  //image index for specific image in list images in project
     }
 

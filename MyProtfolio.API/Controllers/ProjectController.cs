@@ -235,5 +235,33 @@ namespace ProjectController.Controllers
 
             return Ok(project.Skills);
         }
+
+                //github URL for each project 
+        [HttpPut("ProjectURL/{id}")]
+        public async Task<IActionResult> ProjectURL(int id, [FromBody] string url)
+        {
+            if (string.IsNullOrWhiteSpace(url) || !IsValidUrl(url))
+                return BadRequest("url cannot be empty");
+
+            if (!url.Contains("github.com"))
+                return BadRequest("Only GitHub URLs are allowed");
+
+            var project = await _context.Projects.FindAsync(id);
+
+            if (project == null)
+                return NotFound();
+
+            project.ProjectUrl = url;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(project);
+        }
+        bool IsValidUrl(string url)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out var result)
+                && (result.Scheme == "http" || result.Scheme == "https");
+        }
+
     }
 }

@@ -190,3 +190,44 @@ main{
     border:none;
     background-color:transparent;
 }
+.proj-git-sec{
+    width:90%;
+    height: 6vh;
+    margin-left:1vw;
+    position: relative;
+    border: solid 1px;
+    border-color:rgba(255, 138, 243, 0.176);
+    border-radius: 10px;
+    padding:1vh 1.5vw;
+    margin-top:5vh;
+}
+.git-input{
+    width:80%;
+    height:100%;
+}
+.alter-btn-url{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    right:0;
+    top:0;
+}
+.proj-git-sec span{
+    z-index: 100;
+    position: absolute;
+    right: 1.5vw;
+    color: var(--Third-text-color);
+} 
+
+.proj-git-sec a{
+    color: var(--Third-text-color);
+    font-size: 0.85rem;
+} 
+.proj-git-sec:hover{
+    background-color: rgba(174, 88, 254, 0.151);
+    transition: 0.3s;
+}
+.proj-git-sec a:hover{
+    color: var(--mainfont-color);
+    transition: 0.3s;
+}

@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
 
 <main>
@@ -15,7 +16,7 @@
         <div class="card-container">
             @foreach (var project in Projects)
             {
-                <div class ="card"  @key="project.Id">
+                <div class="card @(IsAdmin ? "admin-card" : "")" @key="project.Id">
 
 
                     <!--project images-->
@@ -52,7 +53,7 @@
                 <div class="proj-name">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
-                            @if (project.IsEditing || string.IsNullOrWhiteSpace(project.ProjectName))
+                            @if (project.IsEditingName || string.IsNullOrWhiteSpace(project.ProjectName))
                                 {
                                         <input type="text" calss="proj-input" @bind="project.ProjectName" placeholder="Enter project name.." />
 
@@ -69,7 +70,7 @@
                                     else
                                     {
                                         <h5 class="proj-title"
-                                            @onclick="() => EnableEdit(project)">
+                                            @onclick="() => EnableNameEdit(project)">
                                             @project.ProjectName
                                         </h5>
                                     }    
@@ -86,7 +87,7 @@
                 <div class="proj-description">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
-                             @if (project.IsEditing || string.IsNullOrWhiteSpace(project.Description))
+                             @if (project.IsEditingDescription || string.IsNullOrWhiteSpace(project.Description))
                              {
                                 <textarea class="proj-textarea" @bind="project.Description" placeholder="Enter description..."></textarea>
                                 <div class="alter-btn">
@@ -101,7 +102,7 @@
                              }else
                              {
                                 <p class="proj-view-description"
-                                    @onclick="() => EnableEdit(project)">
+                                    @onclick="() => EnableDescriptionEdit(project)">
                                     @project.Description
                                  </p>
                              }
@@ -159,13 +160,15 @@
                     }
                 </div>
 
-                <!--Github url section-->
+                <!-- Github url section -->
                 <div class="proj-git-sec">
                     <AuthorizeView Roles="Admin">
                         <Authorized>
-                            @if (project.IsEditing)
+                            @if (project.IsEditingUrl)
                             {
-                                <input @bind="project.ProjectUrl" class="git-input" />
+                                <input @bind="project.ProjectUrl"
+                                    class="git-input"
+                                    placeholder="Git url here" />
 
                                 <div class="alter-btn-url">
                                     <button class="save"
@@ -180,37 +183,44 @@
                                     </button>
                                 </div>
                             }
+                            else if (string.IsNullOrWhiteSpace(project.ProjectUrl))
+                            {
+                                <span class="proj-url-placeholder"
+                                    @onclick="() => EnableUrlEdit(project)">
+                                    Git url here
+                                    <i class="bx bx-chevrons-right"></i>
+                                </span>
+                            }
                             else
                             {
-                                @if (!string.IsNullOrWhiteSpace(project.ProjectUrl))
-                                {
-                                
-                                    <a class="proj-view-url"
-                                    href="@project.ProjectUrl"
-                                    target="_blank">
-                                          <i class="bx bxl-github"></i> View on GitHub
-                                    </a>
-                                    <span>
-                                        <i class="bx bx-chevrons-right"></i>
-                                    </span>
-                                
-                                }
-                            }
-                        </Authorized>
-                         <NotAuthorized>
-                             @if (!string.IsNullOrWhiteSpace(project.ProjectUrl))
-                            {
-                               
                                 <a class="proj-view-url"
                                 href="@project.ProjectUrl"
                                 target="_blank">
-                                    <i class="bx bxl-github"></i> View on GitHub
+                                    <i class="bx bxl-github"></i>
+                                    View on GitHub
                                 </a>
-                                 <span>
-                                        <i class="bx bx-chevrons-right"></i>
+
+                                <span @onclick="() => EnableUrlEdit(project)">
+                                    <i class="bx bx-chevrons-right"></i>
                                 </span>
-                        
                             }
+                        </Authorized>
+
+                        <NotAuthorized>
+                            @if (!string.IsNullOrWhiteSpace(project.ProjectUrl))
+                            {
+                                <a class="proj-view-url"
+                                href="@project.ProjectUrl"
+                                target="_blank">
+                                    <i class="bx bxl-github"></i>
+                                    View on GitHub
+                                </a>
+
+                                <span>
+                                    <i class="bx bx-chevrons-right"></i>
+                                </span>
+                            }
+
                         </NotAuthorized>
                     </AuthorizeView>
                 </div>
@@ -234,8 +244,12 @@
     private List<Project> Projects = new();
     string BaseUrl = "http://localhost:5276/";
     private int counter = 1;
+    private bool IsAdmin;
     protected override async Task OnInitializedAsync()//uploding the projects list from database
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+         IsAdmin = authState.User.IsInRole("Admin");
+
         Projects = await Http.GetFromJsonAsync<List<Project>>("api/Project/GetAll")
                 ?? new List<Project>();
     }
@@ -303,7 +317,8 @@
         var newProject = new
         {
             ProjectName = "New Project",
-            Description = "Description here"
+            Description = "Description here",
+            ProjectUrl = ""
         };
 
         var res = await Http.PostAsJsonAsync($"api/Project/Create", newProject);
@@ -355,7 +370,7 @@
 
             project.ProjectName = updatedProject.ProjectName;
 
-            project.IsEditing = false;
+            project.IsEditingName = false;
         }
         else
         {
@@ -390,7 +405,7 @@
 
             project.Description = updatedProject.Description;
 
-            project.IsEditing = false;
+            project.IsEditingDescription = false;
         }
         else
         {
@@ -515,7 +530,7 @@
 
             project.ProjectUrl = updatedProject.ProjectUrl;
 
-            project.IsEditing = false;
+            project.IsEditingUrl = false;
         }
         else
         {
@@ -530,17 +545,29 @@
         StateHasChanged();
     }
 
-    void EnableEdit(Project project)
+    void EnableNameEdit(Project project)
     {
-        project.IsEditing = true;
-        StateHasChanged();
-    } 
+        project.IsEditingName = true;
+    }
+
+    void EnableDescriptionEdit(Project project)
+    {
+        project.IsEditingDescription = true;
+    }
+
+    void EnableUrlEdit(Project project)
+    {
+        project.IsEditingUrl = true;
+    }
 
 
     class Project{
         public string ProjectName { get; set; } = ""; //project name
         public int Id { get; set; } //project id
-        public bool IsEditing { get; set; } = false; //for modification on specific project
+        @* public bool IsEditing { get; set; } = false;  *@
+        public bool IsEditingName { get; set; }=false;//for modification on specific project name 
+        public bool IsEditingDescription { get; set; }=false;//for modifivation on specefic project description 
+        public bool IsEditingUrl { get; set; } =false;//for modi in specfic url
         public string Description { get; set; } = ""; //project description
         public List<ProjectSkill> Skills { get; set; } = new(); //skills learnd in project
         public List<ProjectImage> Images { get; set; } = new(); //images for project

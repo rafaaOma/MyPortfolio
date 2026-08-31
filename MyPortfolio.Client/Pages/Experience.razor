@@ -1,0 +1,30 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<main>
+    <div class="container">
+        <h2 class="title">Experience</h2>
+        <div class="ex-element">
+            <div class="add-ex">
+                <AuthorizeView Roles="Admin"> <!-- admin can add new Experience with add button-->
+                    <Authorized>
+                        <div class="admin-btn">
+                            <button class="btn-add" ><i class="bx bx-plus"/></button> 
+                            <p>Press add button to add new expirance </p>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+</main>
+
+@code{
+    public List<Expirance> expirances= new List<Expirance>();
+     private bool IsAdmin;//see it later
+    public class Expirance
+    {
+        public string ExName {get;set;}="";
+        public DateOnly workDate{get;set;}
+        public string discription{get;set;}="";
+    }
+}
